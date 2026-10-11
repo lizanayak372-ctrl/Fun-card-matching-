@@ -1,1 +1,514 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lavender Memory Match 💜</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --lavender: #b9a0ef;
+  --purple: #7955b8;
+  --dark: #4c376b;
+  --pink: #f5d9ee;
+  --bg: #f7f2ff;
+  --white: #ffffff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 22px 12px;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  color: var(--dark);
+  background:
+    radial-gradient(circle at 10% 10%, #fce4f4, transparent 35%),
+    radial-gradient(circle at 90% 80%, #dfd6ff, transparent 35%),
+    var(--bg);
+}
+
+.container {
+  width: 100%;
+  max-width: 510px;
+  margin: auto;
+  padding: 23px 17px;
+  border: 2px solid #ffffff;
+  border-radius: 28px;
+  background: #ffffffc9;
+  box-shadow: 0 12px 35px #a18acb30;
+  text-align: center;
+}
+
+h1 {
+  font-size: clamp(24px, 6vw, 34px);
+  margin: 0 0 8px;
+  color: var(--purple);
+}
+
+.subtitle {
+  color: #9a84b6;
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 17px;
+}
+
+.stat {
+  background: #f2eaff;
+  border: 1px solid #e5d8ff;
+  border-radius: 15px;
+  padding: 11px 3px;
+  font-size: 12px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 23px;
+  margin-top: 5px;
+  color: var(--purple);
+}
+
+.settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+select {
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid #e4d6ff;
+  background: white;
+  color: var(--dark);
+  font-size: 14px;
+}
+
+#message {
+  min-height: 25px;
+  margin: 13px 0;
+  font-weight: bold;
+  color: var(--purple);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  width: 100%;
+}
+
+.card {
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 2px solid #e5d8ff;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #d9c9ff, #c4b2f1);
+  color: white;
+  font-size: clamp(22px, 7vw, 35px);
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b3a0df;
+  transition: transform .15s, background .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card:active {
+  transform: scale(.94);
+}
+
+.card .symbol {
+  display: none;
+}
+
+.card:not(.revealed):not(.matched)::before {
+  content: "✦";
+  font-size: clamp(23px, 7vw, 34px);
+  color: #fff;
+}
+
+.card.revealed,
+.card.matched {
+  background: #fff;
+  color: var(--purple);
+  border-color: #d7c5ff;
+  box-shadow: 0 4px 0 #e1d4fa;
+}
+
+.card.revealed .symbol,
+.card.matched .symbol {
+  display: inline;
+}
+
+.card.matched {
+  background: #e3f7ec;
+  border-color: #b9e8cd;
+  box-shadow: 0 4px 0 #c2e7d0;
+  cursor: default;
+}
+
+.card:disabled {
+  opacity: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.action {
+  flex: 1;
+  min-height: 46px;
+  padding: 12px 7px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--purple);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.action.secondary {
+  background: #e8dafa;
+  color: var(--dark);
+}
+
+.action:active {
+  transform: scale(.97);
+}
+
+.tip {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #9a84b6;
+  margin-top: 20px;
+}
+
+#winScreen {
+  display: none;
+  margin-top: 18px;
+  padding: 17px 10px;
+  border-radius: 18px;
+  background: #f0e8ff;
+}
+
+#winScreen h2 {
+  color: var(--purple);
+  margin: 0 0 8px;
+}
+
+#winText {
+  margin: 0;
+  font-size: 14px;
+}
+
+button:focus-visible,
+select:focus-visible {
+  outline: 3px solid #7955b8;
+  outline-offset: 3px;
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 18px 11px;
+  }
+
+  .grid {
+    gap: 6px;
+  }
+
+  .card {
+    border-radius: 11px;
+  }
+
+  .stat {
+    font-size: 11px;
+  }
+}
+</style>
+</head>
+
+<body>
+<main class="container">
+
+  <h1>💜 Memory Match 💜</h1>
+  <div class="subtitle">
+    Flip the cards and find matching pairs!
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      ⏱️ Time
+      <strong id="time">00:00</strong>
+    </div>
+    <div class="stat">
+      👆 Moves
+      <strong id="moves">0</strong>
+    </div>
+    <div class="stat">
+      ✨ Pairs
+      <strong id="pairs">0/8</strong>
+    </div>
+  </div>
+
+  <div class="settings">
+    <label for="difficulty">Level:</label>
+    <select id="difficulty">
+      <option value="8">Easy · 8 pairs</option>
+      <option value="10">Medium · 10 pairs</option>
+      <option value="12">Hard · 12 pairs</option>
+    </select>
+  </div>
+
+  <div id="message" aria-live="polite">
+    Ready? Tap a card to begin! 🌷
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div id="winScreen" aria-live="polite">
+    <h2>🎉 You did it! 🎉</h2>
+    <p id="winText"></p>
+  </div>
+
+  <div class="actions">
+    <button class="action" id="restart">🔄 Restart</button>
+    <button class="action secondary" id="newGame">🌸 New Game</button>
+  </div>
+
+  <div class="tip">
+    💡 Remember where each picture is hidden.<br>
+    Match all the pairs to win!
+  </div>
+
+</main>
+
+<script>
+const grid = document.getElementById("grid");
+const timeEl = document.getElementById("time");
+const movesEl = document.getElementById("moves");
+const pairsEl = document.getElementById("pairs");
+const messageEl = document.getElementById("message");
+const difficulty = document.getElementById("difficulty");
+const winScreen = document.getElementById("winScreen");
+const winText = document.getElementById("winText");
+
+const pictures = [
+  "🌸", "🦋", "🌙", "🍓",
+  "🧸", "🍒", "🌈", "🐱",
+  "💎", "🍄", "🪻", "🦄"
+];
+
+let cards = [];
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+let moves = 0;
+let matchedPairs = 0;
+let totalPairs = 8;
+let seconds = 0;
+let timerId = null;
+let started = false;
+let gameOver = false;
+let roundId = 0;
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function formatTime(s) {
+  const min = Math.floor(s / 60);
+  const sec = s % 60;
+  return String(min).padStart(2, "0") + ":" +
+         String(sec).padStart(2, "0");
+}
+
+function updateStats() {
+  timeEl.textContent = formatTime(seconds);
+  movesEl.textContent = moves;
+  pairsEl.textContent = matchedPairs + "/" + totalPairs;
+}
+
+function startTimer() {
+  if (started || gameOver) return;
+
+  started = true;
+  const thisRound = roundId;
+
+  timerId = setInterval(() => {
+    if (thisRound !== roundId || gameOver) return;
+    seconds++;
+    timeEl.textContent = formatTime(seconds);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerId !== null) {
+    clearInterval(timerId);
+    timerId = null;
+  }
+}
+
+function createGame() {
+  roundId++;
+  stopTimer();
+
+  totalPairs = Number(difficulty.value);
+  moves = 0;
+  matchedPairs = 0;
+  seconds = 0;
+  started = false;
+  gameOver = false;
+  lockBoard = false;
+  firstCard = null;
+  secondCard = null;
+
+  winScreen.style.display = "none";
+  messageEl.textContent = "Ready? Tap a card to begin! 🌷";
+
+  updateStats();
+  grid.innerHTML = "";
+
+  const chosen = pictures.slice(0, totalPairs);
+  const deck = shuffle([...chosen, ...chosen]);
+
+  deck.forEach((picture, index) => {
+    const card = document.createElement("button");
+
+    card.type = "button";
+    card.className = "card";
+    card.dataset.picture = picture;
+    card.setAttribute("aria-label", "Hidden card " + (index + 1));
+
+    const symbol = document.createElement("span");
+    symbol.className = "symbol";
+    symbol.textContent = picture;
+
+    card.appendChild(symbol);
+    card.addEventListener("click", () => flipCard(card));
+
+    grid.appendChild(card);
+  });
+
+  cards = [...grid.querySelectorAll(".card")];
+}
+
+function flipCard(card) {
+  if (
+    gameOver ||
+    lockBoard ||
+    card.classList.contains("revealed") ||
+    card.classList.contains("matched")
+  ) {
+    return;
+  }
+
+  startTimer();
+
+  card.classList.add("revealed");
+  card.setAttribute(
+    "aria-label", "Picture " + card.dataset.picture
+  );
+
+  if (firstCard === null) {
+    firstCard = card;
+    messageEl.textContent = "Find its matching picture! 💜";
+    return;
+  }
+
+  secondCard = card;
+  moves++;
+  movesEl.textContent = moves;
+
+  if (firstCard.dataset.picture === secondCard.dataset.picture) {
+    firstCard.classList.add("matched");
+    secondCard.classList.add("matched");
+
+    firstCard.disabled = true;
+    secondCard.disabled = true;
+
+    matchedPairs++;
+    pairsEl.textContent = matchedPairs + "/" + totalPairs;
+
+    firstCard.setAttribute("aria-label", "Matched picture");
+    secondCard.setAttribute("aria-label", "Matched picture");
+
+    firstCard = null;
+    secondCard = null;
+
+    if (matchedPairs === totalPairs) {
+      finishGame();
+    } else {
+      messageEl.textContent = "Yay! A matching pair! ✨";
+    }
+
+  } else {
+    lockBoard = true;
+    messageEl.textContent = "Not a match! Try again 🌷";
+
+    const thisRound = roundId;
+
+    setTimeout(() => {
+      if (thisRound !== roundId) return;
+
+      firstCard.classList.remove("revealed");
+      secondCard.classList.remove("revealed");
+
+      firstCard.setAttribute("aria-label", "Hidden card");
+      secondCard.setAttribute("aria-label", "Hidden card");
+
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+
+      if (!gameOver) {
+        messageEl.textContent = "Keep looking! 💜";
+      }
+    }, 850);
+  }
+}
+
+function finishGame() {
+  gameOver = true;
+  stopTimer();
+
+  messageEl.textContent = "All pairs matched! 🌸";
+  winText.textContent =
+    "You found all " + totalPairs + " pairs in " +
+    moves + " moves and " + formatTime(seconds) + "!";
+
+  winScreen.style.display = "block";
+}
+
+document.getElementById("restart").addEventListener("click", createGame);
+
+document.getElementById("newGame").addEventListener("click", () => {
+  createGame();
+});
+
+difficulty.addEventListener("change", createGame);
+
+createGame();
+</script>
+</body>
+  </html>
+  
