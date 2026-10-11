@@ -261,26 +261,34 @@ function playWin() {
   });
 }
 
+
 function startMusic() {
-  if (musicTimer) return;
+  stopMusic();
+  if (!initAudio()) return;
 
   const melody = [
-    [523, 0], [659, 0.22], [784, 0.44],
-    [659, 0.66], [587, 0.88], [659, 1.10],
-    [523, 1.32], [392, 1.54]
+    523.25, 659.25, 783.99, 659.25,
+    587.33, 698.46, 880, 698.46,
+    523.25, 659.25, 783.99, 1046.5,
+    880, 783.99, 659.25, 523.25
   ];
 
-  function playMelody() {
+  let index = 0;
+
+  function playNote() {
     if (!musicOn) return;
 
-    const note = melody[musicStep % melody.length];
-    tone(note[0], 0.18, "sine", 0.018);
-    musicStep++;
+    const freq = melody[index % melody.length];
+    tone(freq, 0.28, "sine", 0.045);
+    tone(freq / 2, 0.30, "triangle", 0.012, 0.02);
+
+    index++;
   }
 
-  playMelody();
-  musicTimer = setInterval(playMelody, 230);
-}
+  playNote();
+  musicTimer = setInterval(playNote, 320);
+  }
+  
 
 function stopMusic() {
   clearInterval(musicTimer);
